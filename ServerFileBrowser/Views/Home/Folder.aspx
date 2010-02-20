@@ -41,9 +41,11 @@
     <h2><%= Html.Encode(Model.CurrentDirectory) %></h2>
     <a href="<%= Url.Action("Kill") %>">KILL process</a>
     <ul>
+        <% if (Model.CurrentDirectory != null) { %>
         <li>
-            <a class="dir" href="<%= Url.Action("Index", new {path = Directory.GetParent(Model.CurrentDirectory)}) %>">..</a> 
+            <a class="dir" href="<%= Url.Action("Folder", new {path = Directory.GetParent(Model.CurrentDirectory)}) %>">..</a> 
         </li>
+        <% } %>
         <% foreach (var d in Model.Files) { %>
             <li>
                 <a class="<%= d.Type %>" href="<%= Url.FileAction(Model.CurrentDirectory, d) %>"><%= Html.Encode(d.Name) %></a> 

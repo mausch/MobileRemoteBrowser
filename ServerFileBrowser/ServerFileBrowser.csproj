@@ -86,7 +86,7 @@
     <Content Include="Scripts\MicrosoftAjax.debug.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.js" />
     <Content Include="Scripts\MicrosoftMvcAjax.debug.js" />
-    <Content Include="Views\Home\Index.aspx" />
+    <Content Include="Views\Home\Folder.aspx" />
     <Content Include="Views\Web.config" />
   </ItemGroup>
   <ItemGroup>

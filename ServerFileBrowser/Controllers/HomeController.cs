@@ -11,22 +11,33 @@ namespace ServerFileBrowser.Controllers {
     [HandleError]
     public class HomeController : Controller {
         private const int pageSize = 50;
+        public static Process proc;
 
-        public ActionResult Index(string path, int? page) {
-            path = path ?? "c:\\";
+        public ActionResult Index() {
+            var drives = DriveInfo.GetDrives();
+            return View("Folder", new FilesModel {
+                CurrentDirectory = null,
+                Files = drives.Select(d => new FileModel {
+                    Type = FileType.Dir,
+                    Name = d.RootDirectory.Name
+                }).AsPagination(1, drives.Length),
+            });
+        }
+
+        public ActionResult Folder(string path, int? page) {
+            if (path == null)
+                return Index();
             page = page ?? 1;
-            var dirs = Dir.GetDirectories(path)
-                .Select(x => new FileModel { Name = Path.GetFileName(x), Type = FileType.Dir });
-            var files = Dir.GetFiles(path)
-                .Select(x => new FileModel { Name = Path.GetFileName(x), Type = FileType.File });
+            IEnumerable<FileModel> dirs = Dir.GetDirectories(path)
+                .Select(x => new FileModel {Name = Path.GetFileName(x), Type = FileType.Dir});
+            IEnumerable<FileModel> files = Dir.GetFiles(path)
+                .Select(x => new FileModel {Name = Path.GetFileName(x), Type = FileType.File});
             var m = new FilesModel {
                 CurrentDirectory = path,
                 Files = dirs.Concat(files).AsPagination(page.Value, pageSize),
             };
             return View(m);
         }
-
-        public static Process proc;
 
         public ActionResult Kill() {
             KillProc();
@@ -39,7 +50,7 @@ namespace ServerFileBrowser.Controllers {
         }
 
         public ActionResult Run(string path, string file) {
-            var exe = Server.MapPath("/vlc/vlc.exe");
+            string exe = Server.MapPath("/vlc/vlc.exe");
             const int width = 640; // 752
             const int height = 360; // 423
             string output = ":sout=#transcode{$t}:gather:rtp{mp4a-latm,sdp=rtsp://0.0.0.0/vlc.sdp}"
