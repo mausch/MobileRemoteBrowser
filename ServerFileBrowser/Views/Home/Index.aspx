@@ -1,4 +1,6 @@
 ﻿<%@ Page Language="C#" Inherits="System.Web.Mvc.ViewPage<FilesModel>" %>
+<%@ Import Namespace="ServerFileBrowser"%>
+<%@ Import Namespace="MvcContrib.UI.Pager"%>
 <%@ Import Namespace="System.IO"%>
 <%@ Import Namespace="ServerFileBrowser.Models" %>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -42,17 +44,12 @@
         <li>
             <a class="dir" href="<%= Url.Action("Index", new {path = Directory.GetParent(Model.CurrentDirectory)}) %>">..</a> 
         </li>
-        <% foreach (var d in Model.Directories) { %>
+        <% foreach (var d in Model.Files) { %>
             <li>
-                <a class="dir" href="<%= Url.Action("Index", new {path = Path.Combine(Model.CurrentDirectory, d)}) %>"><%= Html.Encode(d) %></a> 
-            </li>
-        <% } %>
-        
-        <% foreach (var f in Model.Files) { %>
-            <li>
-                <a class="file" href="<%= Url.Action("Run", new {path = Model.CurrentDirectory, file = f}) %>"><%= Html.Encode(f) %></a>
+                <a class="<%= d.Type %>" href="<%= Url.FileAction(Model.CurrentDirectory, d) %>"><%= Html.Encode(d.Name) %></a> 
             </li>
         <% } %>
     </ul>
+    <%= Html.Pager(Model.Files) %>
 </body>
 </html>

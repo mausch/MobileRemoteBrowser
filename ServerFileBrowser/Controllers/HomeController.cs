@@ -1,18 +1,26 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
+using MvcContrib.Pagination;
 using ServerFileBrowser.Models;
 
 namespace ServerFileBrowser.Controllers {
     [HandleError]
     public class HomeController : Controller {
-        public ActionResult Index(string path) {
+        private const int pageSize = 50;
+
+        public ActionResult Index(string path, int? page) {
             path = path ?? "c:\\";
+            page = page ?? 1;
+            var dirs = Dir.GetDirectories(path)
+                .Select(x => new FileModel { Name = Path.GetFileName(x), Type = FileType.Dir });
+            var files = Dir.GetFiles(path)
+                .Select(x => new FileModel { Name = Path.GetFileName(x), Type = FileType.File });
             var m = new FilesModel {
                 CurrentDirectory = path,
-                Directories = Dir.GetDirectories(path).Select(x => Path.GetFileName(x)).ToList(),
-                Files = Dir.GetFiles(path).Select(x => Path.GetFileName(x)).ToList(),
+                Files = dirs.Concat(files).AsPagination(page.Value, pageSize),
             };
             return View(m);
         }
