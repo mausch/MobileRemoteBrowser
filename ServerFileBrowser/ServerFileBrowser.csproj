@@ -79,6 +79,7 @@
     <Compile Include="Models\FileModel.cs" />
     <Compile Include="Models\FilesModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Telnet.cs" />
     <Compile Include="UrlHelperExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

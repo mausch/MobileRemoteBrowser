@@ -78,50 +78,19 @@ namespace ServerFileBrowser.Controllers {
             const int width = 640; // 752
             const int height = 360; // 423
             Guid vodId = Guid.NewGuid();
-            var telnet = new TelnetWrapper();
-            telnet.Disconnected += (s, e) => { }; // dummy handler, otherwise NRE
-            telnet.DataAvailable += telnet_DataAvailable;
-            var mre = new ManualResetEvent(false);
-            HttpContext.Items["telnet"] = mre;
-            telnet.Connect("localhost", 4212);
-            try {
-                if (!telnet.Connected)
-                    throw new Exception("Telnet connection to VLC failed");
-                telnet.Receive();
-                mre.WaitOne();
-                mre.Reset();
-                telnet.Send("admin" + telnet.CRLF); // password
-                telnet.Receive();
-                mre.WaitOne();
-                mre.Reset();
-                telnet.Send(string.Format("new {0} vod enabled", vodId) + telnet.CRLF);
-                telnet.Receive();
-                mre.WaitOne();
-                mre.Reset();
-                telnet.Send(string.Format("setup {0} input \"{1}\"", vodId, Path.Combine(path, file)) + telnet.CRLF);
-                telnet.Receive();
-                mre.WaitOne();
-                mre.Reset();
+            using (var telnet = new Telnet()) {
+                telnet.Connect("localhost", 4212);
+                telnet.Send("admin"); // password
+                telnet.Send(string.Format("new {0} vod enabled", vodId));
+                telnet.Send(string.Format("setup {0} input \"{1}\"", vodId, Path.Combine(path, file)));
                 telnet.Send("setup {0} output #transcode{$t}"
                                 .Replace("{0}", vodId.ToString())
                                 .Replace("$t", ConfigurationManager.AppSettings["transcoderSettings"])
                                 .Replace("$w", width.ToString())
-                                .Replace("$h", height.ToString()) + telnet.CRLF);
-                telnet.Receive();
-                mre.WaitOne();
-                mre.Reset();
-            } finally {
-                telnet.Disconnect();
+                                .Replace("$h", height.ToString()));
             }
 
             return Redirect(string.Format("rtsp://{0}/{1}", Request.Url.Host, vodId));
-        }
-
-        private void telnet_DataAvailable(object sender, DataAvailableEventArgs e) {
-            var mre = (ManualResetEvent) HttpContext.Items["telnet"];
-            string data = e.Data;
-            Console.WriteLine(data);
-            mre.Set();
         }
 
         public ActionResult Run(string path, string file) {
