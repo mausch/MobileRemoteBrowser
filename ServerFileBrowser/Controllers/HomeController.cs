@@ -6,6 +6,7 @@ using System.Linq;
 using System.Web.Mvc;
 using MvcContrib.Pagination;
 using ServerFileBrowser.Models;
+using Winista.Mime;
 
 namespace ServerFileBrowser.Controllers {
     [HandleError]
@@ -49,8 +50,19 @@ namespace ServerFileBrowser.Controllers {
                 proc.Kill();
         }
 
-        public ActionResult Run(string path, string file) {
-            string exe = Server.MapPath("/vlc/vlc.exe");
+        private string[] VideoExtensions {
+            get {
+                return ConfigurationManager.AppSettings["videoExtensions"].Split(';');
+            }
+        }
+
+        private bool IsVideo(string filename) {
+            var ext = Path.GetExtension(filename).ToLowerInvariant();
+            return VideoExtensions.Any(e => ext == "." + e.ToLowerInvariant());
+        }
+
+        public ActionResult Video(string path, string file) {
+            string exe = Server.MapPath("~/vlc/vlc.exe");
             const int width = 640; // 752
             const int height = 360; // 423
             string output = ":sout=#transcode{$t}:gather:rtp{mp4a-latm,sdp=rtsp://0.0.0.0/vlc.sdp}"
@@ -60,6 +72,21 @@ namespace ServerFileBrowser.Controllers {
             KillProc();
             proc = Process.Start(exe, string.Format("-I http \"{0}\" {1}", Path.Combine(path, file), output));
             return Redirect(string.Format("rtsp://{0}/vlc.sdp", Request.Url.Host));
+        }
+
+        public ActionResult Run(string path, string file) {
+            if (IsVideo(file))
+                return Video(path, file);
+            var f = Path.Combine(path, file);
+            return File(new FileStream(f, FileMode.Open), GetMimeType(file));
+        }
+
+        private string GetMimeType(string filename) {
+            var mt = new MimeTypes(Server.MapPath("~/mime-types.xml"));
+            var mime = mt.GetMimeType(filename);
+            if (mime != null)
+                return mime.Name;
+            return "application/octet-stream";
         }
     }
 }
