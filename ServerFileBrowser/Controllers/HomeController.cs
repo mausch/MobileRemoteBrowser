@@ -23,7 +23,7 @@ namespace ServerFileBrowser.Controllers {
         }
 
         public ActionResult Index() {
-            DriveInfo[] drives = DriveInfo.GetDrives();
+            var drives = DriveInfo.GetDrives();
             return View("Folder", new FilesModel {
                 CurrentDirectory = null,
                 Files = drives.Select(d => new FileModel {
@@ -37,9 +37,9 @@ namespace ServerFileBrowser.Controllers {
             if (path == null)
                 return Index();
             page = page ?? 1;
-            IEnumerable<FileModel> dirs = Dir.GetDirectories(path)
+            var dirs = Dir.GetDirectories(path)
                 .Select(x => new FileModel {Name = Path.GetFileName(x), Type = FileType.Dir});
-            IEnumerable<FileModel> files = Dir.GetFiles(path)
+            var files = Dir.GetFiles(path)
                 .Select(x => new FileModel {Name = Path.GetFileName(x), Type = FileType.File});
             var m = new FilesModel {
                 CurrentDirectory = path,
@@ -61,14 +61,14 @@ namespace ServerFileBrowser.Controllers {
         }
 
         private bool IsVideo(string filename) {
-            string ext = Path.GetExtension(filename).ToLowerInvariant();
+            var ext = Path.GetExtension(filename).ToLowerInvariant();
             return VideoExtensions.Any(e => ext == "." + e.ToLowerInvariant());
         }
 
         private void RunVLC() {
             if (vlcProc != null)
                 return;
-            string exe = Server.MapPath("~/vlc/vlc.exe");
+            var exe = Server.MapPath("~/vlc/vlc.exe");
             vlcProc = Process.Start(exe, "-I telnet --rtsp-host 0.0.0.0:554");
         }
 
@@ -77,7 +77,7 @@ namespace ServerFileBrowser.Controllers {
             RunVLC();
             const int width = 640; // 752
             const int height = 360; // 423
-            Guid vodId = Guid.NewGuid();
+            var vodId = Guid.NewGuid();
             using (var telnet = new Telnet()) {
                 telnet.Connect("localhost", 4212);
                 telnet.Send("admin"); // password
@@ -98,13 +98,13 @@ namespace ServerFileBrowser.Controllers {
         public ActionResult Run(string path, string file) {
             if (IsVideo(file))
                 return Video(path, file);
-            string f = Path.Combine(path, file);
+            var f = Path.Combine(path, file);
             return File(new FileStream(f, FileMode.Open), GetMimeType(file));
         }
 
         private string GetMimeType(string filename) {
             var mt = new MimeTypes(Server.MapPath("~/mime-types.xml"));
-            MimeType mime = mt.GetMimeType(filename);
+            var mime = mt.GetMimeType(filename);
             if (mime != null)
                 return mime.Name;
             return "application/octet-stream";
