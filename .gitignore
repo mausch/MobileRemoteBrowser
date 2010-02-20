@@ -1,0 +1,6 @@
+
+*.user
+*.suo
+_ReSharper.ServerFileBrowser
+/ServerFileBrowser/obj
+/ServerFileBrowser/bin
