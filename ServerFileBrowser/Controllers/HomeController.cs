@@ -12,7 +12,7 @@ namespace ServerFileBrowser.Controllers {
     [HandleError]
     public class HomeController : Controller {
         private const int pageSize = 50;
-        public static Process proc;
+        private static Process vlcProc;
 
         public ActionResult Index() {
             var drives = DriveInfo.GetDrives();
@@ -40,14 +40,14 @@ namespace ServerFileBrowser.Controllers {
             return View(m);
         }
 
-        public ActionResult Kill() {
-            KillProc();
+        public ActionResult KillVLC() {
+            KillVLCProc();
             return Redirect(Request.UrlReferrer.ToString());
         }
 
-        public static void KillProc() {
-            if (proc != null && !proc.HasExited)
-                proc.Kill();
+        public static void KillVLCProc() {
+            if (vlcProc != null && !vlcProc.HasExited)
+                vlcProc.Kill();
         }
 
         private string[] VideoExtensions {
@@ -69,8 +69,8 @@ namespace ServerFileBrowser.Controllers {
                 .Replace("$t", ConfigurationManager.AppSettings["transcoderSettings"])
                 .Replace("$w", width.ToString())
                 .Replace("$h", height.ToString());
-            KillProc();
-            proc = Process.Start(exe, string.Format("-I http \"{0}\" {1}", Path.Combine(path, file), output));
+            KillVLCProc();
+            vlcProc = Process.Start(exe, string.Format("-I http \"{0}\" {1}", Path.Combine(path, file), output));
             return Redirect(string.Format("rtsp://{0}/vlc.sdp", Request.Url.Host));
         }
 

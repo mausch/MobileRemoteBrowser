@@ -12,7 +12,7 @@
 </head>
 <body>
     <h2><%= Html.Encode(Model.CurrentDirectory) %></h2>
-    <a href="<%= Url.Action("Kill") %>">KILL process</a>
+    <a href="<%= Url.Action("KillVLC") %>">Kill VLC</a>
     <ul>
         <% if (Model.CurrentDirectory != null) { %>
         <li>

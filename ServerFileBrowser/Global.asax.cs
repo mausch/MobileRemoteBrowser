@@ -23,7 +23,7 @@ namespace ServerFileBrowser {
         }
 
         protected void Application_End() {
-            HomeController.KillProc();
+            HomeController.KillVLCProc();
         }
     }
 }
