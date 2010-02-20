@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
+using De.Mud.Telnet;
 using MvcContrib.Pagination;
 using ServerFileBrowser.Models;
 using Winista.Mime;
@@ -63,17 +64,37 @@ namespace ServerFileBrowser.Controllers {
             return VideoExtensions.Any(e => ext == "." + e.ToLowerInvariant());
         }
 
-        public ActionResult Video(string path, string file) {
+        private void RunVLC() {
+            if (vlcProc != null)
+                return;
             string exe = Server.MapPath("~/vlc/vlc.exe");
+            vlcProc = Process.Start(exe, "-I telnet --rtsp-host 0.0.0.0:554");
+        }
+
+        public ActionResult Video(string path, string file) {
+            RunVLC();
             const int width = 640; // 752
             const int height = 360; // 423
-            string output = ":sout=#transcode{$t}:gather:rtp{mp4a-latm,sdp=rtsp://0.0.0.0/vlc.sdp}"
-                .Replace("$t", ConfigurationManager.AppSettings["transcoderSettings"])
-                .Replace("$w", width.ToString())
-                .Replace("$h", height.ToString());
-            KillVLCProc();
-            vlcProc = Process.Start(exe, string.Format("-I http \"{0}\" {1}", Path.Combine(path, file), output));
-            return Redirect(string.Format("rtsp://{0}/vlc.sdp", Request.Url.Host));
+            var vodId = Guid.NewGuid();
+            var telnet = new TelnetWrapper();
+            try {
+                telnet.Connect("localhost", 4212);
+                if (!telnet.Connected)
+                    throw new Exception("Telnet connection to VLC failed");
+                telnet.Send("admin" + telnet.CRLF); // password
+                telnet.Send(string.Format("new {0} vod enabled", vodId) + telnet.CRLF);
+                telnet.Send(string.Format("setup {0} input \"{1}\"", vodId, Path.Combine(path, file)) + telnet.CRLF);
+                telnet.Send("setup {0} output #transcode{$t}"
+                    .Replace("{0}", vodId.ToString())
+                    .Replace("$t", ConfigurationManager.AppSettings["transcoderSettings"])
+                    .Replace("$w", width.ToString())
+                    .Replace("$h", height.ToString()) + telnet.CRLF);
+            } finally {
+                telnet.Disconnect();
+                telnet.Dispose();
+            }
+
+            return Redirect(string.Format("rtsp://{0}/{1}", Request.Url.Host, vodId));
         }
 
         public ActionResult Run(string path, string file) {
