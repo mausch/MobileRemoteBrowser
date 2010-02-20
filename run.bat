@@ -1,1 +1,1 @@
-cassini\UltiDevCassinWebServer2.exe /run %cd%\ServerFileBrowser
+cassini\UltiDevCassinWebServer2.exe /run "%cd%\ServerFileBrowser" default.aspx 0 nobrowser

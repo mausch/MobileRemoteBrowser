@@ -1,5 +1,6 @@
 
 *.user
+*.bak
 *.suo
 _ReSharper.ServerFileBrowser
 /ServerFileBrowser/obj
