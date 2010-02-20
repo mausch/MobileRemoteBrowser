@@ -8,34 +8,7 @@
 <head>
     <meta name="viewport" content="width=480; initial-scale=0.6666; maximum-scale=1.0; minimum-scale=0.6666" />
     <title><%= Html.Encode(Model.CurrentDirectory)%></title>
-    <style>
-        body 
-        {
-            font-size: 150%;
-        }
-        ul 
-        {
-            list-style-type: none;
-            width: 100%;
-            padding: 0px;
-        }
-        ul li 
-        {
-            width: 100%;
-            height: 50px;
-        }
-        a
-        {
-            display: block;
-            padding: 15px;
-            background-color: #bbb;
-            border: solid 3px black;
-        }
-        .dir 
-        {
-            background-color: #E1BB7E;
-        }
-    </style>
+    <link href="/Content/Site.css" rel="Stylesheet" type="text/css"/>
 </head>
 <body>
     <h2><%= Html.Encode(Model.CurrentDirectory) %></h2>
