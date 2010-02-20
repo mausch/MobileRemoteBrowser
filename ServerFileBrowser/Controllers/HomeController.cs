@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -41,7 +42,8 @@ namespace ServerFileBrowser.Controllers {
             var exe = Server.MapPath("/vlc/vlc.exe");
             const int width = 640; // 752
             const int height = 360; // 423
-            string output = ":sout=#transcode{audio-sync,soverlay,ab=64,samplerate=44100,channels=1,acodec=mp4a,vcodec=h264,width=$w,height=$h,vfilter=\"canvas{width=$w,height=$h,aspect=16:9}\",vb=500,venc=x264{profile=baseline}}:gather:rtp{mp4a-latm,sdp=rtsp://0.0.0.0/vlc.sdp}"
+            string output = ":sout=#transcode{$t}:gather:rtp{mp4a-latm,sdp=rtsp://0.0.0.0/vlc.sdp}"
+                .Replace("$t", ConfigurationManager.AppSettings["transcoderSettings"])
                 .Replace("$w", width.ToString())
                 .Replace("$h", height.ToString());
             KillProc();
