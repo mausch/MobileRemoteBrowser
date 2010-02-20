@@ -17,7 +17,7 @@ namespace ServerFileBrowser.Controllers {
             return View(m);
         }
 
-        private static Process proc;
+        public static Process proc;
 
         public ActionResult Run(string path, string file) {
             const string exe = @"c:\Program Files (x86)\vlc-1.0.3-win32\vlc.exe";
