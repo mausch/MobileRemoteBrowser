@@ -4,11 +4,8 @@ using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Web.Mvc;
-using De.Mud.Telnet;
 using MvcContrib.Pagination;
-using Net.Graphite.Telnet;
 using ServerFileBrowser.Models;
 using Winista.Mime;
 
@@ -57,8 +54,10 @@ namespace ServerFileBrowser.Controllers {
         }
 
         public static void KillVLCProc() {
-            if (vlcProc != null && !vlcProc.HasExited)
+            if (vlcProc != null && !vlcProc.HasExited) {
                 vlcProc.Kill();
+                vlcProc = null;
+            }
         }
 
         private bool IsVideo(string filename) {
@@ -74,6 +73,7 @@ namespace ServerFileBrowser.Controllers {
         }
 
         public ActionResult Video(string path, string file) {
+            KillVLCProc();
             RunVLC();
             const int width = 640; // 752
             const int height = 360; // 423
@@ -81,16 +81,18 @@ namespace ServerFileBrowser.Controllers {
             using (var telnet = new Telnet()) {
                 telnet.Connect("localhost", 4212);
                 telnet.Send("admin"); // password
-                telnet.Send(string.Format("new {0} vod enabled", vodId));
+                telnet.Send(string.Format("new {0} broadcast enabled", vodId));
                 telnet.Send(string.Format("setup {0} input \"{1}\"", vodId, Path.Combine(path, file)));
-                telnet.Send("setup {0} output #transcode{$t}"
+                //telnet.Send(string.Format("setup {0} mux mov", vodId)); // mp4 mp2t mp2p ts ps mp2v mp4v avi asf
+                telnet.Send("setup {0} output #transcode{$t}:gather:rtp{mp4a-latm,sdp=rtsp://0.0.0.0/{0}.sdp}"
                                 .Replace("{0}", vodId.ToString())
                                 .Replace("$t", ConfigurationManager.AppSettings["transcoderSettings"])
                                 .Replace("$w", width.ToString())
                                 .Replace("$h", height.ToString()));
+                telnet.Send(string.Format("control {0} play", vodId));
             }
 
-            return Redirect(string.Format("rtsp://{0}/{1}", Request.Url.Host, vodId));
+            return Redirect(string.Format("rtsp://{0}/{1}.sdp", Request.Url.Host, vodId));
         }
 
         public ActionResult Run(string path, string file) {
