@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -11,11 +12,18 @@ using Winista.Mime;
 namespace ServerFileBrowser.Controllers {
     [HandleError]
     public class HomeController : Controller {
-        private const int pageSize = 50;
         private static Process vlcProc;
 
+        private string[] VideoExtensions {
+            get { return ConfigurationManager.AppSettings["videoExtensions"].Split(';'); }
+        }
+
+        private int PageSize {
+            get { return Convert.ToInt32(ConfigurationManager.AppSettings["pageSize"]); }
+        }
+
         public ActionResult Index() {
-            var drives = DriveInfo.GetDrives();
+            DriveInfo[] drives = DriveInfo.GetDrives();
             return View("Folder", new FilesModel {
                 CurrentDirectory = null,
                 Files = drives.Select(d => new FileModel {
@@ -35,7 +43,7 @@ namespace ServerFileBrowser.Controllers {
                 .Select(x => new FileModel {Name = Path.GetFileName(x), Type = FileType.File});
             var m = new FilesModel {
                 CurrentDirectory = path,
-                Files = dirs.Concat(files).AsPagination(page.Value, pageSize),
+                Files = dirs.Concat(files).AsPagination(page.Value, PageSize),
             };
             return View(m);
         }
@@ -50,14 +58,8 @@ namespace ServerFileBrowser.Controllers {
                 vlcProc.Kill();
         }
 
-        private string[] VideoExtensions {
-            get {
-                return ConfigurationManager.AppSettings["videoExtensions"].Split(';');
-            }
-        }
-
         private bool IsVideo(string filename) {
-            var ext = Path.GetExtension(filename).ToLowerInvariant();
+            string ext = Path.GetExtension(filename).ToLowerInvariant();
             return VideoExtensions.Any(e => ext == "." + e.ToLowerInvariant());
         }
 
@@ -77,13 +79,13 @@ namespace ServerFileBrowser.Controllers {
         public ActionResult Run(string path, string file) {
             if (IsVideo(file))
                 return Video(path, file);
-            var f = Path.Combine(path, file);
+            string f = Path.Combine(path, file);
             return File(new FileStream(f, FileMode.Open), GetMimeType(file));
         }
 
         private string GetMimeType(string filename) {
             var mt = new MimeTypes(Server.MapPath("~/mime-types.xml"));
-            var mime = mt.GetMimeType(filename);
+            MimeType mime = mt.GetMimeType(filename);
             if (mime != null)
                 return mime.Name;
             return "application/octet-stream";
