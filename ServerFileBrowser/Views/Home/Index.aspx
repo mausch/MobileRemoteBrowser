@@ -4,8 +4,13 @@
 <%@ Import Namespace="ServerFileBrowser.Models" %>
 <html>
 <head>
+    <meta name="viewport" content="width=480; initial-scale=0.6666; maximum-scale=1.0; minimum-scale=0.6666" />
     <title><%= Html.Encode(Model.CurrentDirectory)%></title>
     <style>
+        body 
+        {
+            font-size: 150%;
+        }
         ul 
         {
             list-style-type: none;
@@ -20,7 +25,7 @@
         a
         {
             display: block;
-            padding: 10px;
+            padding: 15px;
             background-color: #bbb;
             border: solid 3px black;
         }
@@ -31,8 +36,7 @@
     </style>
 </head>
 <body>
-    <h2>
-        <%= Html.Encode(Model.CurrentDirectory) %></h2>
+    <h2><%= Html.Encode(Model.CurrentDirectory) %></h2>
     <ul>
         <li>
             <a class="dir" href="<%= Url.Action("Index", new {path = Directory.GetParent(Model.CurrentDirectory)}) %>">..</a> 
