@@ -11,8 +11,8 @@ namespace ServerFileBrowser.Controllers {
             path = path ?? "c:\\";
             var m = new FilesModel {
                 CurrentDirectory = path,
-                Directories = Directory.GetDirectories(path).Select(x => Path.GetFileName(x)).ToList(),
-                Files = Directory.GetFiles(path).Select(x => Path.GetFileName(x)).ToList(),
+                Directories = Dir.GetDirectories(path).Select(x => Path.GetFileName(x)).ToList(),
+                Files = Dir.GetFiles(path).Select(x => Path.GetFileName(x)).ToList(),
             };
             return View(m);
         }
