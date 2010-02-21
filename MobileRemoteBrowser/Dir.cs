@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using Microsoft.Win32.SafeHandles;
 
-namespace ServerFileBrowser {
+namespace MobileRemoteBrowser {
     // From http://weblogs.asp.net/podwysocki/archive/2008/10/16/functional-net-fighting-friction-in-the-bcl-with-directory-getfiles.aspx
     public class Dir {
         public static IEnumerable<string> GetDirectories(string directory) {

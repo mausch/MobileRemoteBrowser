@@ -3,7 +3,7 @@ using System.Threading;
 using De.Mud.Telnet;
 using Net.Graphite.Telnet;
 
-namespace ServerFileBrowser {
+namespace MobileRemoteBrowser {
     public class Telnet : IDisposable {
         private readonly ManualResetEvent mre = new ManualResetEvent(false);
         private readonly TelnetWrapper telnet;

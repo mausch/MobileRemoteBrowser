@@ -1,4 +1,4 @@
-﻿namespace ServerFileBrowser.Models {
+﻿namespace MobileRemoteBrowser.Models {
     public class FileModel {
         public string Type { get; set; }
         public string Name { get; set; }

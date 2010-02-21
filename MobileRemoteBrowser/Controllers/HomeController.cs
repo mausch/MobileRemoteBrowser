@@ -5,11 +5,11 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Web.Mvc;
+using MobileRemoteBrowser.Models;
 using MvcContrib.Pagination;
-using ServerFileBrowser.Models;
 using Winista.Mime;
 
-namespace ServerFileBrowser.Controllers {
+namespace MobileRemoteBrowser.Controllers {
     [HandleError]
     public class HomeController : Controller {
         private static Process vlcProc;
