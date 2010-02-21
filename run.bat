@@ -1,1 +1,1 @@
-cassini\UltiDevCassinWebServer2.exe /run "%cd%\ServerFileBrowser" default.aspx 0 nobrowser
+cassini\UltiDevCassinWebServer2.exe /run "%cd%\MobileRemoteBrowser" default.aspx 0 nobrowser

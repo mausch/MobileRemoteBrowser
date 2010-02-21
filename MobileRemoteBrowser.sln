@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerFileBrowser", "ServerFileBrowser\ServerFileBrowser.csproj", "{124FDC63-F96E-49C8-9F99-15E04C5E878E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MobileRemoteBrowser", "MobileRemoteBrowser\MobileRemoteBrowser.csproj", "{124FDC63-F96E-49C8-9F99-15E04C5E878E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

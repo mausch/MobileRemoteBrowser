@@ -2,6 +2,7 @@
 *.user
 *.bak
 *.suo
-_ReSharper.ServerFileBrowser
-/ServerFileBrowser/obj
-/ServerFileBrowser/bin
+*.cache
+_ReSharper.MobileRemoteBrowser
+/MobileRemoteBrowser/obj
+/MobileRemoteBrowser/bin
