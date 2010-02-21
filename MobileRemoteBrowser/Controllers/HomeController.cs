@@ -79,17 +79,22 @@ namespace MobileRemoteBrowser.Controllers {
             const int height = 360; // 423
             var vodId = Guid.NewGuid();
             using (var telnet = new Telnet()) {
-                telnet.Connect("localhost", 4212);
+                telnet.Connect("127.0.0.1", 4212);
                 telnet.Send("admin"); // password
+                telnet.Receive();
                 telnet.Send(string.Format("new {0} broadcast enabled", vodId));
+                telnet.Receive();
                 telnet.Send(string.Format("setup {0} input \"{1}\"", vodId, Path.Combine(path, file)));
+                telnet.Receive();
                 //telnet.Send(string.Format("setup {0} mux mov", vodId)); // mp4 mp2t mp2p ts ps mp2v mp4v avi asf
                 telnet.Send("setup {0} output #transcode{$t}:gather:rtp{mp4a-latm,sdp=rtsp://0.0.0.0/{0}.sdp}"
                                 .Replace("{0}", vodId.ToString())
                                 .Replace("$t", ConfigurationManager.AppSettings["transcoderSettings"])
                                 .Replace("$w", width.ToString())
                                 .Replace("$h", height.ToString()));
+                telnet.Receive();
                 telnet.Send(string.Format("control {0} play", vodId));
+                telnet.Receive();
             }
 
             return Redirect(string.Format("rtsp://{0}/{1}.sdp", Request.Url.Host, vodId));

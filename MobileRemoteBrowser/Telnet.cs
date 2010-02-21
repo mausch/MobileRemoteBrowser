@@ -1,43 +1,33 @@
-﻿using System;
-using System.Threading;
-using De.Mud.Telnet;
-using Net.Graphite.Telnet;
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
 
 namespace MobileRemoteBrowser {
-    public class Telnet : IDisposable {
-        private readonly ManualResetEvent mre = new ManualResetEvent(false);
-        private readonly TelnetWrapper telnet;
-        private string receivedData;
+    public class Telnet: IDisposable {
+        private Socket socket;
+        private readonly Encoding encoding = Encoding.UTF8;
 
-        public Telnet() {
-            telnet = new TelnetWrapper();
-            telnet.Disconnected += (s, e) => { }; // dummy handler, otherwise NRE
-            telnet.DataAvailable += telnet_DataAvailable;
+        public void Connect(string ip, int port) {
+            var ipe = new IPEndPoint(IPAddress.Parse(ip), port);
+            socket = new Socket(ipe.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            socket.Connect(ipe);
+        }
+
+        public void Send(string s) {
+            socket.Send(encoding.GetBytes(s + "\n"));
+        }
+
+        public string Receive() {
+            var buffer = new byte[100];
+            var size = socket.Receive(buffer);
+            Array.Resize(ref buffer, size);
+            return encoding.GetString(buffer);
         }
 
         public void Dispose() {
-            if (telnet.Connected)
-                telnet.Dispose();
-        }
-
-        private void telnet_DataAvailable(object sender, DataAvailableEventArgs e) {
-            receivedData = e.Data;
-            mre.Set();
-        }
-
-        public void Connect(string host, int port) {
-            telnet.Connect(host, port);
-            telnet.Receive();
-            mre.WaitOne();
-            mre.Reset();
-        }
-
-        public string Send(string cmd) {
-            telnet.Send(cmd + telnet.CRLF);
-            telnet.Receive();
-            mre.WaitOne();
-            mre.Reset();
-            return receivedData;
+            if (socket != null)
+                (socket as IDisposable).Dispose();
         }
     }
 }
