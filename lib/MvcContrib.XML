@@ -92,6 +92,28 @@
             An object containing the parameters for a route. The parameters are retrieved via reflection by examining the properties of the object. Typically created using object initializer syntax.
             </summary>
         </member>
+        <member name="T:MvcContrib.ActionResults.RedirectToRouteResult`1">
+            <summary>
+            Represents a result that performs a redirect using a lambda expression to generate the route values.
+            </summary>
+            <typeparam name="T">Type of controller</typeparam>
+        </member>
+        <member name="M:MvcContrib.ActionResults.RedirectToRouteResult`1.#ctor(System.Linq.Expressions.Expression{System.Action{`0}})">
+            <summary>
+            Creates a new instance of the RedirectToRouteResult class.
+            </summary>
+            <param name="expression"></param>
+        </member>
+        <member name="M:MvcContrib.ActionResults.RedirectToRouteResult`1.#ctor(System.Linq.Expressions.Expression{System.Action{`0}},MvcContrib.ActionResults.ExpressionToRouteValueConverter{`0})">
+            <summary>
+            Creates a new instance of the RedirectToRouteResult class using the specified ExpressionParser
+            </summary>
+        </member>
+        <member name="P:MvcContrib.ActionResults.RedirectToRouteResult`1.Expression">
+            <summary>
+            The route values.
+            </summary>
+        </member>
         <member name="T:MvcContrib.ActionResults.XmlResult">
             <summary>
             Action result that serializes the specified object into XML and outputs it to the response stream.
@@ -110,6 +132,13 @@
             Creates a new instance of the XmlResult class.
             </summary>
             <param name="objectToSerialize">The object to serialize to XML.</param>
+        </member>
+        <member name="M:MvcContrib.ActionResults.XmlResult.#ctor(System.Object,System.Xml.Serialization.XmlAttributeOverrides)">
+            <summary>
+            Creates a new instance of the XMLResult class.
+            </summary>
+            <param name="objectToSerialize">The object to serialize to XML.</param>
+            <param name="xmlAttributeOverrides"></param>
         </member>
         <member name="M:MvcContrib.ActionResults.XmlResult.ExecuteResult(System.Web.Mvc.ControllerContext)">
             <summary>
@@ -151,31 +180,63 @@
              e.g. QueryString = 4, Form = 6, TempData = 2, RouteData = 1 "4,6,3,2"
             </summary>
         </member>
-        <member name="T:MvcContrib.Attributes.AcceptGetAttribute">
+        <member name="T:MvcContrib.Attributes.DerivedTypeBinderAwareAttribute">
             <summary>
-            Ensures that an action is not executed unless it is accessed through an HTTP GET.
+            This attribute is used to identify alternate types that should be considered by the default model
+            binder when running.
             </summary>
         </member>
-        <member name="M:MvcContrib.Attributes.AcceptGetAttribute.IsValidForRequest(System.Web.Mvc.ControllerContext,System.Reflection.MethodInfo)">
+        <member name="M:MvcContrib.Attributes.DerivedTypeBinderAwareAttribute.#ctor(System.Type)">
             <summary>
-            Ensures that the action decorated by this attribute is only valid if the HTTP method is a GET.
+            ctor describing a class that may be alternatively bound to a common base property
             </summary>
-            <param name="controllerContext">The current controller context</param>
-            <param name="methodInfo">The current action method</param>
-            <returns>True if the action is being accessed via an HTTP GET</returns>
+            <param name="derivedType"></param>
         </member>
-        <member name="T:MvcContrib.Attributes.AcceptPostAttribute">
+        <member name="P:MvcContrib.Attributes.DerivedTypeBinderAwareAttribute.DerivedType">
             <summary>
-            Ensures that an action is not executed unless it is accessed through an HTTP POST.
+            the type declared for binding
             </summary>
         </member>
-        <member name="M:MvcContrib.Attributes.AcceptPostAttribute.IsValidForRequest(System.Web.Mvc.ControllerContext,System.Reflection.MethodInfo)">
+        <member name="T:MvcContrib.Binders.DerivedTypeModelBinder">
             <summary>
-            Ensures that the action decorated by this attribute is only valid if the HTTP method is a POST.
+            This model binder extends the default model binder to detect alternate runtime types
+            on a page and allow the binder adapt to derived types.
             </summary>
-            <param name="controllerContext">The current controller context</param>
-            <param name="methodInfo">The current action method</param>
-            <returns>True if the action is being accessed via an HTTP POST</returns>
+        </member>
+        <member name="M:MvcContrib.Binders.DerivedTypeModelBinder.CreateModel(System.Web.Mvc.ControllerContext,System.Web.Mvc.ModelBindingContext,System.Type)">
+            <summary>
+            An override of CreateModel that focuses on detecting alternate types at runtime
+            </summary>
+            <param name="controllerContext">the controller context</param>
+            <param name="bindingContext">the binding context</param>
+            <param name="modelType">the target type to be instantiated by this method and rehydrated by 
+            the default model binder</param>
+            <returns>instance of the target model type</returns>
+        </member>
+        <member name="T:MvcContrib.Binders.DerivedTypeModelBinderCache">
+            <summary>
+            This cache is used to both improve performance of the derived type model binder
+            on cases where a binding type has already been identified.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.Binders.DerivedTypeModelBinderCache.RegisterDerivedTypes(System.Type,System.Collections.Generic.IEnumerable{System.Type})">
+            <summary>
+            Registers the attached set of derived types by the indicated base type
+            </summary>
+            <param name="baseType">base type that will be encountered by the binder where an alternate value should be used</param>
+            <param name="derivedTypes">an enumerable set of types to be considered for binding</param>
+        </member>
+        <member name="M:MvcContrib.Binders.DerivedTypeModelBinderCache.GetDerivedTypes(System.Type)">
+            <summary>
+            Searches for the requested base type in the cache
+            </summary>
+            <param name="baseType">type used to located the set of registered alternate types</param>
+            <returns>the set of matching alternate types or null when a set is not found</returns>
+        </member>
+        <member name="M:MvcContrib.Binders.DerivedTypeModelBinderCache.Reset">
+            <summary>
+            removes all items from the cache
+            </summary>
         </member>
         <member name="T:MvcContrib.Binders.SubControllerBinder">
             <summary>
@@ -188,6 +249,11 @@
             </summary>
             <param name="destinationType">The type of subcontroller</param>
             <returns>an object instance</returns>
+        </member>
+        <member name="T:MvcContrib.ConversionExtensions">
+            <summary>
+            Class used for type conversion related extension methods
+            </summary>
         </member>
         <member name="T:MvcContrib.EnumerableExtensions.EnumerableExtensions">
             <summary>
@@ -253,21 +319,32 @@
         <member name="T:MvcContrib.Filters.ModelStateToTempDataAttribute">
             <summary>
             When a RedirectToRouteResult is returned from an action, anything in the ViewData.ModelState dictionary will be copied into TempData.
-            When a ViewResult is returned from an action, any ModelState entries that were previously copied to TempData will be copied back to the ModelState dictionary.
+            When a ViewResultBase is returned from an action, any ModelState entries that were previously copied to TempData will be copied back to the ModelState dictionary.
             </summary>
         </member>
         <member name="M:MvcContrib.Filters.ModelStateToTempDataAttribute.OnActionExecuted(System.Web.Mvc.ActionExecutedContext)">
             <summary>
             When a RedirectToRouteResult is returned from an action, anything in the ViewData.ModelState dictionary will be copied into TempData.
-            When a ViewResult is returned from an action, any ModelState entries that were previously copied to TempData will be copied back to the ModelState dictionary.
+            When a ViewResultBase is returned from an action, any ModelState entries that were previously copied to TempData will be copied back to the ModelState dictionary.
             </summary>
             <param name="filterContext"></param>
         </member>
         <member name="T:MvcContrib.Filters.PassParametersDuringRedirectAttribute">
             <summary>
             When placed on a controller or action, this attribute will ensure
-            that parameters passed into RedirectToAction&lt;T&gt;() will get
-            passed to the controller or action that this attribute is placed on.
+            that reference-type-parameters (or value types which cannot be converted from a string) passed into 
+            RedirectToAction&lt;T&gt;() will get passed to the controller or action that this attribute is placed on.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.Filters.PassParametersDuringRedirectAttribute.OnActionExecuting(System.Web.Mvc.ActionExecutingContext)">
+            <summary>
+            Loads parameters from TempData into the ActionParameters dictionary.
+            </summary>
+            <param name="filterContext"></param>
+        </member>
+        <member name="M:MvcContrib.Filters.PassParametersDuringRedirectAttribute.OnActionExecuted(System.Web.Mvc.ActionExecutedContext)">
+            <summary>
+            Stores any parameters passed to the generic RedirectToAction method in TempData.
             </summary>
         </member>
         <member name="T:MvcContrib.Filters.RescueAttribute">
@@ -391,22 +468,6 @@
             <param name="action">An expression which identifies the action to redirect to on the controller of type <typeparamref name="T"/></param>
             <returns>A <see cref="T:System.Web.Mvc.RedirectToRouteResult"/> pointing to the action specified by the <paramref name="action"/> expression</returns>
         </member>
-        <member name="M:MvcContrib.ControllerExtensions.RemoveReferenceTypesFromRouteValues(System.Web.Routing.RouteValueDictionary)">
-            <summary>
-            The ExpressionHelper.GetRouteValuesFromExpression() method in MVC Futures will 
-            put all parameters from the lambda expression into the route value dictionary,
-            but if the parameter is a reference type, that doesn't make sense and leads to 
-            URLs like http://mysite.com/account/add?model=MyProject.AccountViewModel and
-            extraneous errors in ModelState.  So we'll strip out those reference types
-            in here.
-            
-            If you really wanted to have a reference type in the route value dictionary,
-            you should override ToString() in the object and have it return something 
-            meaningful that could be added to the route value dictionary.  If you do that,
-            this method will see the route value as a string and will not strip it out.
-            </summary>
-            <param name="dictionary"></param>
-        </member>
         <member name="M:MvcContrib.ControllerExtensions.IsController(System.Type)">
             <summary>
             Determines whether the specified type is a controller
@@ -504,6 +565,89 @@
             </summary>
             <param name="filterContext">The ActionExecutedContext</param>
         </member>
+        <member name="T:MvcContrib.FluentController.AbstractFluentController">
+            <summary>
+            <para>A fluent controller to standardise the design of controllers and ease the burden of testing.</para>
+            
+            <para>If you need Dependency Injection (and you might want to for repositories) do so in your own constructor.</para>
+            
+            <code>
+                public class UserController : AbstractFluentController
+               {
+                   public UserController()
+                   {
+                       DIContainer.ResolveDependencies(this);
+                   }
+               ...
+            </code>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:MvcContrib.FluentController.AbstractFluentController.CheckValidCall(System.Action)">
+            <summary>
+            Wrap any controller calls in this method.  This variant will use a
+            model of type 'bool' and always return true.
+            </summary>
+            <param name="action"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MvcContrib.FluentController.AbstractFluentController.CheckValidCall``1(System.Func{``0},System.Boolean)">
+            <summary>
+            Wrap controller calls with this method.  This will check for ModelState.IsValid
+            before performing <paramref name="action"/> and check for ModelState.IsValid afterwards.
+            <typeparam name="T">The type of the model returned from this method.  This will be passed into the Valid method.</typeparam>
+            <param name="action">The action to perform.</param>
+            <param name="executeActionWhenInvalid">If true, will execute the action even if ModelState.IsValid is false initially</param>
+            </summary>
+            <returns>A FluentControllerAction that can be used to setup the valid and invalid actions.</returns>
+        </member>
+        <member name="M:MvcContrib.FluentController.AbstractFluentController.ExecuteCheckValidCall(System.Func{System.Object})">
+            <summary>
+            This is public for testing purposes only and shouldn't be used
+            </summary>
+            <param name="action"></param>
+            <returns></returns>
+        </member>
+        <member name="T:MvcContrib.FluentController.AbstractRestfulFluentController">
+            <summary>
+            <para>A Restful fluent controller to standardise the design of controllers and ease 
+            the burden of testing.</para>
+            
+            <para>If you need Dependency Injection (and you might want to for repositories) 
+            do so in your own constructor.</para>
+            
+            <code>
+                public class UserController : AbstractRestfulFluentController
+               {
+                   public UserController()
+                   {
+                       DIContainer.ResolveDependencies(this);
+                   }
+               ...
+            </code>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:MvcContrib.FluentController.IRestfulController">
+            <summary>
+            Extends the <see cref="T:System.Web.Mvc.Controller"/> to allow for <see cref="T:MvcContrib.SimplyRestful.RestfulAction"/> to be passed around instead of strings.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.FluentController.FluentControllerAction`1.op_Implicit(MvcContrib.FluentController.FluentControllerAction{`0})~System.Web.Mvc.ActionResult">
+            <summary>
+            Implicit cast so that we can return the results of this directly.
+            </summary>
+            <param name="fluentAction"></param>
+            <returns></returns>
+        </member>
+        <member name="T:MvcContrib.HeadResult">
+            <summary>
+             HeadResult is a specific <see cref="T:System.Web.Mvc.ActionResult"/> for returning the client an <see cref="T:System.Net.HttpStatusCode"/>.
+             This is particular useful for RESTful applications that return status codes only in some situations eg Not-Modified
+            </summary>
+        </member>
         <member name="T:MvcContrib.Hash">
             <summary>
             Untyped, case insensitive dictionary that can be initialised using lambdas.
@@ -548,6 +692,13 @@
             <param name="objectToConvert">The object to convert</param>
             <returns>A generic dictionary</returns>
         </member>
+        <member name="M:MvcContrib.DictionaryExtensions.ToHtmlAttributes(System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Converts a dictionary into a string of HTML attributes
+            </summary>
+            <param name="attributes"></param>
+            <returns></returns>
+        </member>
         <member name="T:MvcContrib.HttpContextExtensions">
             <summary>
             Static class containing extenstion to HttpContextBase
@@ -582,6 +733,46 @@
             <summary>
              Gets and sets a model object that matches the generic type.
             </summary>
+        </member>
+        <member name="M:MvcContrib.ObjectExtensions.ReadValue``2(``0,System.Func{``0,``1})">
+            <summary>
+            Returns the result of <paramref name="func"/> if <paramref name="obj"/> is not null.
+            <example>
+            <code>
+            Request.Url.ReadValue(x => x.Query)
+            </code>
+            </example>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <typeparam name="TResult">The type of the result.</typeparam>
+            <param name="obj">The obj.</param>
+            <param name="func">The func.</param>
+            <returns></returns>
+        </member>
+        <member name="M:MvcContrib.ObjectExtensions.ReadValue``2(``0,System.Func{``0,``1},``1)">
+            <summary>
+            Returns the result of <paramref name="func"/> if <paramref name="obj"/> is not null.
+            Otherwise, <paramref name="defaultValue"/> is returned.
+            <example>
+            <code>
+            Request.Url.ReadValue(x => x.Query, "default")
+            </code>
+            </example>
+            </summary>
+            <typeparam name="T"></typeparam>
+            <typeparam name="TResult"></typeparam>
+            <param name="obj"></param>
+            <param name="func"></param>
+            <param name="defaultValue"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MvcContrib.ObjectExtensions.ExecuteAction``1(``0,System.Action{``0})">
+            <summary>
+            Executes an action if <paramref name="obj"/> is not null, otherwise does nothing
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="obj"></param>
+            <param name="action"></param>
         </member>
         <member name="T:MvcContrib.Pagination.CustomPagination`1">
             <summary>
@@ -708,6 +899,16 @@
             <param name="pageNumber">The page number to return.</param>
             <param name="pageSize">Number of objects per page.</param>
             <returns>An IPagination of T</returns>
+        </member>
+        <member name="T:MvcContrib.PortableAreas.AssemblyResourceManager">
+            <summary>
+            Manages all .NET assemblies that have registered their embedded resources.
+            </summary>
+        </member>
+        <member name="T:MvcContrib.UI.InputBuilder.ViewEngine.AssemblyResourceStore">
+            <summary>
+            Stores all the embedded resources for a single assembly/area.
+            </summary>
         </member>
         <member name="T:MvcContrib.Routing.DebugHttpHandler">
             <summary>
@@ -882,6 +1083,17 @@
             </summary>
             <value>The string used to generate urls for this route.</value>
         </member>
+        <member name="M:MvcContrib.Routing.RouteAttributeUtility.MapRoute(System.Web.Routing.RouteCollection,System.String,System.String,System.Collections.Generic.IDictionary{System.String,System.Object},System.Collections.Generic.IDictionary{System.String,System.Object},System.Collections.Generic.ICollection{System.String})">
+            <summary>
+            This was copied from System.Web.Mvc.RouteCollectionExtensions and
+            modified slightly.  The original function declares the defaults
+            and constraints parameters as object type, which causes the wrong
+            overload of RouteValueDictionary to be invoked, causing values in
+            the dictionaries not to be set properly.  The modified version
+            declares these parameters as Dictionary&lt;string, object&gt;,
+            fixing the problem.
+            </summary>
+        </member>
         <member name="T:MvcContrib.Routing.RouteDebugger">
             <summary>
             Helper class for switching the default route handler to the debug route handler.
@@ -893,10 +1105,124 @@
             </summary>
             <param name="routes">The route table</param>
         </member>
+        <member name="T:MvcContrib.Routing.UrlRouteAttribute">
+            <summary>
+            Assigns a URL route to an MVC Controller class method.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.Routing.UrlRouteAttribute.Name">
+            <summary>
+            Optional name of the route.  Route names must be unique per route.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.Routing.UrlRouteAttribute.Order">
+            <summary>
+            Optional order in which to add the route (default is 0).  Routes
+            with lower order values will be added before those with higher.
+            Routes that have the same order value will be added in undefined
+            order with respect to each other.
+            </summary>
+        </member>
+        <member name="T:MvcContrib.Routing.UrlRouteParameterConstraintAttribute">
+            <summary>
+            Assigns a constraint to a route parameter in a UrlRouteAttribute.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.Routing.UrlRouteParameterConstraintAttribute.Name">
+            <summary>
+            Name of the route parameter on which to apply the constraint.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.Routing.UrlRouteParameterConstraintAttribute.Regex">
+            <summary>
+            Regular expression constraint to test on the route parameter value
+            in the URL.
+            </summary>
+        </member>
+        <member name="T:MvcContrib.Routing.UrlRouteParameterDefaultAttribute">
+            <summary>
+            Assigns a default value to a route parameter in a UrlRouteAttribute
+            if not specified in the URL.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.Routing.UrlRouteParameterDefaultAttribute.Name">
+            <summary>
+            Name of the route parameter for which to supply the default value.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.Routing.UrlRouteParameterDefaultAttribute.Value">
+            <summary>
+            Default value to set on the route parameter if not specified in the URL.
+            </summary>
+        </member>
+        <member name="T:MvcContrib.Services.EmailMetadata">
+            <summary>
+            Base class for email models. 
+            
+            Derived classes will provide specific values to substitute placeholders in concrete emails.
+            If nothing to substitute, this class can be used directly.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.Services.EmailMetadata.#ctor">
+            <summary>
+            Initializes an empty instance of EmailMetadata.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.Services.EmailMetadata.#ctor(System.Net.Mail.MailAddress,System.Net.Mail.MailAddress)">
+            <summary>
+            Initializes a new instance of the EmailMetadata class by using 
+            the specified "from" and "to" email addresses.
+            </summary>
+            <param name="from">A mail address of the sender.</param>
+            <param name="to">A mail address of the recipient.</param>
+        </member>
+        <member name="M:MvcContrib.Services.EmailMetadata.#ctor(System.String,System.String)">
+            <summary>
+            Initializes a new instance of the EmailMetadata class by using the specified 
+            "from" and "to" email addresses.
+            </summary>
+            <param name="from">A string that contains email address of the sender.</param>
+            <param name="to">A string that contains email address of the recipient.</param>
+        </member>
         <member name="T:MvcContrib.Services.EmailTemplateService">
             <remarks>
             Inspired by Castle's EmailTemplateService.
             </remarks>
+        </member>
+        <member name="T:MvcContrib.Services.IEmailTemplateService">
+            <summary>
+            Service to render MailMessages from MVC views.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.Services.IEmailTemplateService.RenderMessage(System.String,MvcContrib.Services.EmailMetadata,System.Web.Mvc.ControllerContext)">
+            <summary>
+            Generates an instance of a MailMessage from the given view and metadata. 
+            </summary>
+            <param name="viewName">
+            Name of the view that contain email subject and email body.
+            The first line of the view is considered subject, everything else is body.
+            </param>
+            <param name="metadata">
+            Mail addresses "to", "from", "cc" and other metadata about the email.
+            </param>
+            <param name="context">
+            The context for view rendering.
+            </param>
+            <returns>Returns a MailMessage ready for sending out.</returns>
+        </member>
+        <member name="T:MvcContrib.Services.EmailTemplateService.EmailDetails">
+            <summary>
+            The only information that comes from the email template is subject and body. 
+            
+            Everything else ("to", "from", etc) is known when we call the service. 
+            But subject/body are localizable and can contain placeholders - so they need 
+            to get fetched from the email template view. 
+            </summary>
+        </member>
+        <member name="T:MvcContrib.Services.IViewStreamReader">
+            <summary>
+            Reads view as a stream.
+            </summary>
         </member>
         <member name="T:MvcContrib.NameValueDeserializer">
             <summary>
@@ -1003,6 +1329,27 @@
             <returns>An Anonymous Type with a default Action property and and default Controller property
             if <paramref name="controllerName"/> is not null or empty.</returns>
         </member>
+        <member name="T:MvcContrib.Sorting.SortExtensions">
+            <summary>
+            Extension methods for sorting.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.Sorting.SortExtensions.OrderBy``1(System.Collections.Generic.IEnumerable{``0},System.String,MvcContrib.Sorting.SortDirection)">
+            <summary>
+            Orders a datasource by a property with the specified name in the specified direction
+            </summary>
+            <param name="datasource">The datasource to order</param>
+            <param name="propertyName">The name of the property to order by</param>
+            <param name="direction">The direction</param>
+        </member>
+        <member name="M:MvcContrib.Sorting.SortExtensions.OrderBy``1(System.Linq.IQueryable{``0},System.String,MvcContrib.Sorting.SortDirection)">
+            <summary>
+            Orders a datasource by a property with the specified name in the specified direction
+            </summary>
+            <param name="datasource">The datasource to order</param>
+            <param name="propertyName">The name of the property to order by</param>
+            <param name="direction">The direction</param>
+        </member>
         <member name="T:MvcContrib.SubController">
             <summary>
              SubController base class for subcontrollers.  SubControllers can  be infinitely nested.
@@ -1026,14 +1373,6 @@
              SubController with generic Model property.
             </summary>
             <typeparam name="T"></typeparam>
-        </member>
-        <member name="T:MvcContrib.UI.BlockRenderer">
-            <summary>Renders an Action delegate and captures all output to a string. </summary>
-        </member>
-        <member name="M:MvcContrib.UI.BlockRenderer.Capture(System.Action)">
-            <summary>Renders the action and returns a string.</summary>
-            <param name="viewRenderer">The delegate to render.</param>
-            <returns>The rendered text.</returns>
         </member>
         <member name="T:MvcContrib.UI.CleanTagBuilder">
             <summary>
@@ -1195,72 +1534,27 @@
             <param name="tableAttributes">The table attributes.</param>
             <returns></returns>
         </member>
-        <member name="T:MvcContrib.UI.Grid.GridModel`1">
+        <member name="T:MvcContrib.UI.Grid.AutoColumnBuilder`1">
             <summary>
-            Default model for grid
+            Can be used to build column using metadata
             </summary>
         </member>
-        <member name="T:MvcContrib.UI.Grid.IGridModel`1">
+        <member name="T:MvcContrib.UI.Grid.ColumnBuilder`1">
             <summary>
-            Defines a grid model
+            Builds grid columns
             </summary>
         </member>
-        <member name="M:MvcContrib.UI.Grid.GridModel`1.#ctor">
+        <member name="M:MvcContrib.UI.Grid.ColumnBuilder`1.For(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
             <summary>
-            Creates a new instance of the GridModel class
+            Specifies a column should be constructed for the specified property.
             </summary>
+            <param name="propertySpecifier">Lambda that specifies the property for which a column should be constructed</param>
         </member>
-        <member name="M:MvcContrib.UI.Grid.GridModel`1.Empty(System.String)">
+        <member name="M:MvcContrib.UI.Grid.ColumnBuilder`1.For(System.String)">
             <summary>
-            Text that will be displayed when the grid has no data.
+            Specifies that a custom column should be constructed with the specified name.
             </summary>
-            <param name="emptyText">Text to display</param>
-        </member>
-        <member name="M:MvcContrib.UI.Grid.GridModel`1.Attributes(System.Func{System.Object,System.Object}[])">
-            <summary>
-            Defines additional attributes for the grid.
-            </summary>
-            <param name="hash"></param>
-        </member>
-        <member name="M:MvcContrib.UI.Grid.GridModel`1.Attributes(System.Collections.Generic.IDictionary{System.String,System.Object})">
-            <summary>
-            Defines additional attributes for the grid
-            </summary>
-            <param name="attributes"></param>
-        </member>
-        <member name="M:MvcContrib.UI.Grid.GridModel`1.RenderUsing(MvcContrib.UI.Grid.IGridRenderer{`0})">
-            <summary>
-            Specifies the Renderer to use with this grid. If omitted, the HtmlTableGridRenderer will be used. 
-            </summary>
-            <param name="renderer">The Renderer to use</param>
-        </member>
-        <member name="P:MvcContrib.UI.Grid.GridModel`1.Column">
-            <summary>
-            Column builder for this grid model
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.Grid.GridModel`1.MvcContrib#UI#Grid#IGridModel{T}#Sections">
-            <summary>
-            Section overrides for this grid model.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.Grid.GridModel`1.Sections">
-            <summary>
-            Section overrides for this grid model.
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.HtmlAttributeRendererExtensions.BuildHtmlAttributes(System.Collections.Generic.IDictionary{System.String,System.Object})">
-            <summary>
-            Converts the specified attributes dictionary of key-value pairs into a string of HTML attributes. 
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.HtmlAttributeRendererExtensions.BuildHtmlAttributes(System.Collections.Generic.IDictionary{System.String,System.Object},System.Boolean)">
-            <summary>
-            Converts the specified attributes dictionary of key-value pairs into a string of HTML attributes. 
-            </summary>
-            <param name="startSpace">Should it start with a space if <param name="attributes"/> isn't empty.</param>
-            <returns></returns>
+            <param name="name"></param>
         </member>
         <member name="T:MvcContrib.UI.Grid.ActionSyntax.ActionSyntaxExtensions">
             <summary>
@@ -1304,23 +1598,6 @@
             <param name="action">The action to render</param>
             <returns></returns>
         </member>
-        <member name="T:MvcContrib.UI.Grid.ColumnBuilder`1">
-            <summary>
-            Builds grid columns
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.Grid.ColumnBuilder`1.For(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
-            <summary>
-            Specifies a column should be constructed for the specified property.
-            </summary>
-            <param name="propertySpecifier">Lambda that specifies the property for which a column should be constructed</param>
-        </member>
-        <member name="M:MvcContrib.UI.Grid.ColumnBuilder`1.For(System.String)">
-            <summary>
-            Specifies that a custom column should be constructed with the specified name.
-            </summary>
-            <param name="name"></param>
-        </member>
         <member name="T:MvcContrib.UI.Grid.GridColumn`1">
             <summary>
             Column for the grid
@@ -1363,6 +1640,11 @@
             <param name="isVisible"></param>
             <returns></returns>
         </member>
+        <member name="M:MvcContrib.UI.Grid.IGridColumn`1.Encode(System.Boolean)">
+            <summary>
+            Determines whether or not the column should be encoded. Default is true.
+            </summary>
+        </member>
         <member name="M:MvcContrib.UI.Grid.IGridColumn`1.DoNotEncode">
             <summary>
             Do not HTML Encode the output
@@ -1382,6 +1664,29 @@
             </summary>
             <param name="attributes">Lambda expression that should return a dictionary containing the attributes for the cell</param>
             <returns></returns>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.IGridColumn`1.Sortable(System.Boolean)">
+            <summary>
+            Specifies whether or not this column should be sortable. 
+            The default is true. 
+            </summary>
+            <param name="isColumnSortable"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.IGridColumn`1.SortColumnName(System.String)">
+            <summary>
+            Specifies a custom name that should be used when sorting on this column
+            </summary>
+            <param name="name"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.IGridColumn`1.InsertAt(System.Int32)">
+            <summary>
+            Specifies the position of a column. 
+            This is usually used in conjunction with the AutoGenerateColumns method 
+            in order to specify where additional custom columns should be placed.
+            </summary>
+            <param name="index">The index at which the column should be inserted</param>
         </member>
         <member name="P:MvcContrib.UI.Grid.IGridColumn`1.CustomHeaderRenderer">
             <summary>
@@ -1441,6 +1746,71 @@
             Additional attributes for the cell
             </summary>
         </member>
+        <member name="T:MvcContrib.UI.Grid.GridModel`1">
+            <summary>
+            Default model for grid
+            </summary>
+        </member>
+        <member name="T:MvcContrib.UI.Grid.IGridModel`1">
+            <summary>
+            Defines a grid model
+            </summary>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.GridModel`1.#ctor">
+            <summary>
+            Creates a new instance of the GridModel class
+            </summary>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.GridModel`1.Empty(System.String)">
+            <summary>
+            Text that will be displayed when the grid has no data.
+            </summary>
+            <param name="emptyText">Text to display</param>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.GridModel`1.Attributes(System.Func{System.Object,System.Object}[])">
+            <summary>
+            Defines additional attributes for the grid.
+            </summary>
+            <param name="hash"></param>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.GridModel`1.Attributes(System.Collections.Generic.IDictionary{System.String,System.Object})">
+            <summary>
+            Defines additional attributes for the grid
+            </summary>
+            <param name="attributes"></param>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.GridModel`1.RenderUsing(MvcContrib.UI.Grid.IGridRenderer{`0})">
+            <summary>
+            Specifies the Renderer to use with this grid. If omitted, the HtmlTableGridRenderer will be used. 
+            </summary>
+            <param name="renderer">The Renderer to use</param>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.GridModel`1.Sort(MvcContrib.UI.Grid.GridSortOptions)">
+            <summary>
+            Secifies that the grid is currently being sorted by the specified column in a particular direction.
+            </summary>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.GridModel`1.Sort(MvcContrib.UI.Grid.GridSortOptions,System.String)">
+            <summary>
+            Specifies that the grid is currently being sorted by the specified column in a particular direction.
+            This overload allows you to specify a prefix.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.UI.Grid.GridModel`1.Column">
+            <summary>
+            Column builder for this grid model
+            </summary>
+        </member>
+        <member name="P:MvcContrib.UI.Grid.GridModel`1.MvcContrib#UI#Grid#IGridModel{T}#Sections">
+            <summary>
+            Section overrides for this grid model.
+            </summary>
+        </member>
+        <member name="P:MvcContrib.UI.Grid.GridModel`1.Sections">
+            <summary>
+            Section overrides for this grid model.
+            </summary>
+        </member>
         <member name="T:MvcContrib.UI.Grid.Grid`1">
             <summary>
             Defines a grid to be rendered.
@@ -1487,6 +1857,16 @@
             </summary>
             <param name="attributes">Attributes for the header row</param>
             <returns></returns>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.Syntax.IGridWithOptions`1.Sort(MvcContrib.UI.Grid.GridSortOptions)">
+            <summary>
+            Specifies that the grid is currently sorted
+            </summary>
+        </member>
+        <member name="M:MvcContrib.UI.Grid.Syntax.IGridWithOptions`1.Sort(MvcContrib.UI.Grid.GridSortOptions,System.String)">
+            <summary>
+            Specifies that the grid is sorted. Column links will have the specified prefix prepended.
+            </summary>
         </member>
         <member name="M:MvcContrib.UI.Grid.Syntax.IGridWithOptions`1.Render">
             <summary>
@@ -1691,6 +2071,11 @@
             Sections for a grid.
             </summary>
         </member>
+        <member name="T:MvcContrib.UI.Grid.GridSortOptions">
+            <summary>
+            Sorting information for use with the grid.
+            </summary>
+        </member>
         <member name="T:MvcContrib.UI.Grid.HtmlTableGridRenderer`1">
             <summary>
             Renders a grid as an HTML table.
@@ -1706,32 +2091,6 @@
             <summary>
             Context class used when rendering the grid.
             </summary>
-        </member>
-        <member name="T:MvcContrib.UI.DomQuery">
-            <summary>A representation of a query to find Elements in the Dom.</summary>
-        </member>
-        <member name="M:MvcContrib.UI.DomQuery.ToString">
-            <summary>The query string.</summary>
-            <returns>The CSS Selector query string.</returns>
-        </member>
-        <member name="M:MvcContrib.UI.DomQuery.op_Implicit(System.String)~MvcContrib.UI.DomQuery">
-            <summary>Converts a regular string into a DomQuery.</summary>
-            <param name="query">The CSS Selector query.</param>
-            <returns>The DomQuery</returns>
-            <remarks>The query will always have <see cref="P:MvcContrib.UI.DomQuery.HasOnlyIds"/> <c>== false</c>
-            and will always return an empty collection of <see cref="P:MvcContrib.UI.DomQuery.Ids"/>.
-            </remarks>
-        </member>
-        <member name="P:MvcContrib.UI.DomQuery.IsSimple">
-            <summary>True if the query is only a single element id</summary>
-        </member>
-        <member name="P:MvcContrib.UI.DomQuery.HasOnlyIds">
-            <summary>True if the query string is only a selection of html id's.</summary>
-            <remarks>IJSGenerator implementors can use this to develop more efficient
-            javascript than always calling a css selector function.</remarks>
-        </member>
-        <member name="P:MvcContrib.UI.DomQuery.Ids">
-            <summary>The list of raw id's that are included in the query string.</summary>
         </member>
         <member name="F:MvcContrib.UI.Html.ModelVisualizerExtension.HtmlContainer">
             <summary>
@@ -1787,345 +2146,7 @@
             <param name="objectToRender"></param>
             <returns></returns>
         </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.GridColumn`1">
-            <summary>
-            A column to be rendered as part of a grid.
-            </summary>
-            <typeparam name="T">Type of object to be rendered in the grid.</typeparam>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridColumn`1.#ctor">
-            <summary>
-            Creates a new instance of the <see cref="T:MvcContrib.UI.LegacyGrid.GridColumn`1"/>
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridColumn`1.SplitPascalCase(System.String)">
-            <summary>
-            Replaces pascal casing with spaces. For example "CustomerId" would become "Customer Id".
-            Strings that already contain spaces are ignored.
-            </summary>
-            <param name="input">String to split</param>
-            <returns>The string after being split</returns>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.ColumnDelegate">
-            <summary>
-            Delegate that will be invoked on each item in the in the datasource in order to obtain the current item's value.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.Name">
-            <summary>
-            Name of the column
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.Format">
-            <summary>
-            Custom format for the cell output.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.DoNotSplit">
-            <summary>
-            Whether or not PascalCased names should be split.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.CellCondition">
-            <summary>
-            Delegate used to hide the contents of the cells in a column.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.ColumnCondition">
-            <summary>
-            Delegate used to hide the entire column
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.CustomRenderer">
-            <summary>
-            Delegate that can be used to perform custom rendering actions.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.CustomHeader">
-            <summary>
-            Delegate used to specify a custom heading.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.Encode">
-            <summary>
-            Whether to HTML-Encode the output (default is true).
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridColumn`1.HeaderAttributes">
-            <summary>
-            The attributs to apply to the header of the column.
-            </summary>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.GridColumnBuilder`1">
-            <summary>
-            Constructs GridColumn objects representing the columns to be rendered in a grid.
-            </summary>
-            <typeparam name="T"></typeparam>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.IExpressionColumnBuilder`1">
-             <summary>
-             Used in the construction of columns that have been specified using a lambda expression.
-             </summary>
-            <typeparam name="T">Type of object to generate grid rows for.</typeparam>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.INestedGridColumnBuilder`1">
-            <summary>
-            Used in the construction of grid columns.
-            </summary>
-            <typeparam name="T">Type of object to generate grid rows for.</typeparam>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.INestedGridColumnBuilder`1.Formatted(System.String)">
-            <summary>
-            Specifies that when rendered, the value for the column should have the specified string formatting applied to it.
-            </summary>
-            <param name="format">The format to apply.</param>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.INestedGridColumnBuilder`1.DoNotEncode">
-            <summary>
-            By default, all output is HTML-Encoded. Specifying DoNotEncode will disable the encoding for all cells in this column.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.INestedGridColumnBuilder`1.CellCondition(System.Func{`0,System.Boolean})">
-            <summary>
-            Can be used to hide the contents of all the cells in the current column. If the specified func returns false then the contents of the cells will not be rendered.
-            </summary>
-            <param name="condition">Delegate that will be invoked to determine whether the contents of the cells should be rendered.</param>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.INestedGridColumnBuilder`1.ColumnCondition(System.Func{System.Boolean})">
-            <summary>
-            Can be used to hide the entire column. If the specified func returns false then the column will not be rendered.
-            </summary>
-            <param name="condition">Delegate that will be invoked to determine whether the column should be rendered.</param>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.INestedGridColumnBuilder`1.Header(System.Action)">
-            <summary>
-            Can be used to perform custom rendering for a column's heading.
-            </summary>
-            <param name="block">Delegate to invoke to perform the rendering.</param>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.INestedGridColumnBuilder`1.HeaderAttributes(System.Collections.IDictionary)">
-            <summary>
-            Applies the specified attributes to the header.
-            </summary>
-            <param name="attributes">A dictionary containing HTML attributes</param>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.IExpressionColumnBuilder`1.DoNotSplit">
-            <summary>
-            By default, a property such as "CustomerName" will be be parsed in order to produce a column heading of "Customer Name".
-            Calling DoNotSplit will disable the parsing of the property names for this column heading.
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.ISimpleColumnBuilder`1">
-            <summary>
-            Used in the construction of Grid columns. 
-            </summary>
-            <typeparam name="T">Type of item to render the column for.</typeparam>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.ISimpleColumnBuilder`1.Do(System.Action{`0})">
-            <summary>
-            Specifies a custom delegate for the rendering of a particular cell. 
-            </summary>
-            <param name="block">The delegate to invoke</param>
-            <returns>The grid column builder.</returns>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.IRootGridColumnBuilder`1">
-            <summary>
-            Used in the construction of grid columns.
-            </summary>
-            <typeparam name="T">Type of object to generate grid rows for.</typeparam>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.IRootGridColumnBuilder`1.For(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
-            <summary>
-            Uses a lambda expression to specify which property the column should be rendered for.
-            </summary>
-            <param name="expression">Lambda expression for the property.</param>
-            <returns>A Column builder.</returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.IRootGridColumnBuilder`1.For(System.Func{`0,System.Object},System.String)">
-            <summary>
-            Uses a lambda expression to specify which property the column should be rendered for.
-            </summary>
-            <param name="func">Lambda expression for the property.</param>
-            <param name="name">Custom column heading.</param>
-            <returns>A Column builder.</returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.IRootGridColumnBuilder`1.For(System.String)">
-            <summary>
-            Specifies a string representation of a property name for which a column should be created. 
-            Using this approach will resort to using reflection to obtain the property value.
-            </summary>
-            <param name="name">Property name to generate the column for.</param>
-            <returns>A Column builder</returns>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.IGridSections`1">
-            <summary>
-            Used to provide custon sections to the grid.
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.IGridSections`1.RowStart(System.Action{`0})">
-            <summary>
-            Executes a delegate that can be used to specify custom HTML to replace the built in rendering of the start of the row.
-            </summary>
-            <param name="block">Action that renders the HTML.</param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.IGridSections`1.RowStart(System.Action{`0,System.Boolean})">
-            <summary>
-            Executes a delegate that can be used to specify custom HTML to replace the built in rendering of the start of the row with alternate row as additional parameter.
-            </summary>
-            <param name="block">Action that renders the HTML.</param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.IGridSections`1.RowEnd(System.Action{`0})">
-            <summary>
-            Executes a delegate that can be used to specify custom HTML to replace the built in rendering of the end of the row.
-            </summary>
-            <param name="block">Action that renders the HTML.</param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridColumnBuilder`1.HeaderAttributes(System.Collections.IDictionary)">
-            <summary>
-            Applies the specified attributes to the header of the current column.
-            </summary>
-            <param name="attributes"></param>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridColumnBuilder`1.ExpressionToName(System.Linq.Expressions.Expression{System.Func{`0,System.Object}})">
-            <summary>
-            Grabs the property name from a member expression.
-            </summary>
-            <param name="expression">The expression</param>
-            <returns>The name of the property</returns>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.GridExtensions">
-            <summary>
-            Extension methods on the HtmlHelper for creating Grid instances.
-            </summary>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.Grid`1">
-            <summary>
-            Implementation of the grid for rendering HTML in a gridview style.
-            </summary>
-            <typeparam name="T">Type of object to be rendered in each row.</typeparam>
-        </member>
-        <member name="T:MvcContrib.UI.LegacyGrid.GridBase`1">
-            <summary>
-            Base class for SmartGrid functionality.
-            </summary>
-            <typeparam name="T">The type of object for each row in the grid.</typeparam>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridBase`1.RenderText(System.String)">
-            <summary>
-            Renders text to the output stream
-            </summary>
-            <param name="text">The text to render</param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridBase`1.Render">
-            <summary>
-            Performs the rendering of the grid.
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridBase`1.RenderItems">
-            <summary>
-            Iterates over the items collection, builds up the markup for each row and outputs the results.
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridBase`1.RenderHeader">
-            <summary>
-            If there are items to display, iterate over each column and output the results. 
-            If there are no items to display, return false to indicate execution of RenderItems should not take place.
-            </summary>
-            <returns>boolean indication whether or not items should be rendered.</returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridBase`1.RenderRowStart(`0,System.Boolean)">
-            <summary>
-            Renders the start of a row to the output stream.
-            </summary>
-            <param name="item">The item to be rendered into this row.</param>
-            <param name="isAlternate">Whether the row is an alternate row</param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.GridBase`1.RenderRowEnd(`0)">
-            <summary>
-            Renders the end of a row to the output stream.
-            </summary>
-            <param name="item">The item being rendered in to this row.</param>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridBase`1.Items">
-            <summary>
-            The items to be displayed in the grid.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridBase`1.Columns">
-            <summary>
-            The columns to generate.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridBase`1.Writer">
-            <summary>
-            The writer to output the results to.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.GridBase`1.EmptyMessageText">
-            <summary>
-            Message to be displayed if the Items property is empty.
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.Grid`1.#ctor(System.String,System.Web.Mvc.ViewContext,MvcContrib.UI.LegacyGrid.GridColumnBuilder{`0},System.Collections.IDictionary,System.IO.TextWriter)">
-            <summary>
-            Creates a new instance of the <see cref="T:MvcContrib.UI.LegacyGrid.Grid`1"/> class using the specified viewDataKey to extract the data source from the viewdata.
-            </summary>
-            <param name="viewDataKey">Key to use to extract the </param>
-            <param name="viewContext">The view context</param>
-            <param name="columns">Columns</param>
-            <param name="htmlAttributes">Custom html attributes and options</param>
-            <param name="writer">Where to write the output</param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.Grid`1.#ctor(System.Collections.Generic.IEnumerable{`0},MvcContrib.UI.LegacyGrid.GridColumnBuilder{`0},System.Collections.IDictionary,System.IO.TextWriter,System.Web.HttpContextBase)">
-            <summary>
-            Creates a new instance of the <see cref="T:MvcContrib.UI.LegacyGrid.Grid`1"/> using the specified data source.
-            </summary>
-            <param name="items">Data source</param>
-            <param name="columns">Columns</param>
-            <param name="htmlAttributes">Custom attributes and options</param>
-            <param name="writer">Where to write the output</param>
-            <param name="context">HTTP Context</param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.Grid`1.RenderPagination(MvcContrib.Pagination.IPagination)">
-            <summary>
-            Renders the pagination section of the grid.
-            Eg "Showing 1 - 10 of 20 | last, prev, next, last"
-            </summary>
-            <param name="pagedList"></param>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.Grid`1.CreatePageLink(System.Int32,System.String)">
-            <summary>
-            Creates a pagination link and includes and curren
-            </summary>
-            <param name="pageNumber"></param>
-            <param name="text"></param>
-            <returns></returns>
-        </member>
-        <member name="M:MvcContrib.UI.LegacyGrid.Grid`1.BuildHtmlAttributes(System.Collections.IDictionary)">
-            <summary>
-            Converts the specified attributes dictionary of key-value pairs into a string of HTML attributes. 
-            </summary>
-            <returns></returns>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.Grid`1.HtmlAttributes">
-            <summary>
-            Custom HTML attributes.
-            </summary>
-        </member>
-        <member name="P:MvcContrib.UI.LegacyGrid.Grid`1.Context">
-            <summary>
-            The HTTP Context.
-            </summary>
-        </member>
-        <member name="M:MvcContrib.UI.Html.HtmlHelperExtensions.ResolveUrl(System.Web.Mvc.HtmlHelper,System.String)">
+        <member name="M:MvcContrib.UI.Html.HtmlHelperExtension.ResolveUrl(System.Web.Mvc.HtmlHelper,System.String)">
             <summary>
             Normalizes a url in the form ~/path/to/resource.aspx.
             </summary>
@@ -2133,7 +2154,7 @@
             <param name="relativeUrl"></param>
             <returns></returns>
         </member>
-        <member name="M:MvcContrib.UI.Html.HtmlHelperExtensions.Stylesheet(System.Web.Mvc.HtmlHelper,System.String)">
+        <member name="M:MvcContrib.UI.Html.HtmlHelperExtension.Stylesheet(System.Web.Mvc.HtmlHelper,System.String)">
             <summary>
             Renders a link tag referencing the stylesheet.  Assumes the CSS is in the /content/css directory unless a
             full relative URL is specified.
@@ -2142,7 +2163,18 @@
             <param name="cssFile"></param>
             <returns></returns>
         </member>
-        <member name="M:MvcContrib.UI.Html.HtmlHelperExtensions.ScriptInclude(System.Web.Mvc.HtmlHelper,System.String)">
+        <member name="M:MvcContrib.UI.Html.HtmlHelperExtension.Stylesheet(System.Web.Mvc.HtmlHelper,System.String,System.String)">
+            <summary>
+            Renders a link tag referencing the stylesheet.  Assumes the CSS is in the /content/css directory unless a
+            full relative URL is specified.  Also provides an additional parameter to specify the media
+            that the stylesheet is targeting.
+            </summary>
+            <param name="html"></param>
+            <param name="cssFile"></param>
+            <param name="media"></param>
+            <returns></returns>
+        </member>
+        <member name="M:MvcContrib.UI.Html.HtmlHelperExtension.ScriptInclude(System.Web.Mvc.HtmlHelper,System.String)">
             <summary>
             Renders a script tag referencing the javascript file.  Assumes the file is in the /scripts directory
             unless a full relative URL is specified.
@@ -2151,7 +2183,7 @@
             <param name="jsFile"></param>
             <returns></returns>
         </member>
-        <member name="M:MvcContrib.UI.Html.HtmlHelperExtensions.Favicon(System.Web.Mvc.HtmlHelper)">
+        <member name="M:MvcContrib.UI.Html.HtmlHelperExtension.Favicon(System.Web.Mvc.HtmlHelper)">
             <summary>
             Renders a favicon link tag.  Points to ~/favicon.ico.
             </summary>
