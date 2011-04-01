@@ -91,8 +91,6 @@ namespace MobileRemoteBrowser.Controllers {
         public ActionResult Video(string path, string file) {
             KillVLCProc();
             RunVLC();
-            const int width = 640; // 752
-            const int height = 360; // 423
             Guid vodId = Guid.NewGuid();
             using (var telnet = new Telnet()) {
                 telnet.Connect("127.0.0.1", 4212);
