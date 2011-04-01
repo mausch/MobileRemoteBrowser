@@ -118,12 +118,13 @@ namespace MobileRemoteBrowser.Controllers {
             if (IsVideo(file))
                 return Video(path, file);
             string f = Path.Combine(path, file);
-            return File(new FileStream(f, FileMode.Open), GetMimeType(file));
+            var mime = GetMimeType(file);
+            return File(new FileStream(f, FileMode.Open), mime);
         }
 
         private string GetMimeType(string filename) {
             var mt = new MimeTypes(Server.MapPath("~/mime-types.xml"));
-            MimeType mime = mt.GetMimeType(filename);
+            MimeType mime = mt.GetMimeType(filename.ToLowerInvariant());
             if (mime != null)
                 return mime.Name;
             return "application/octet-stream";
